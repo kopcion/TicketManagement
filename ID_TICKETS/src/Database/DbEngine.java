@@ -118,7 +118,7 @@ public class DbEngine {
             set.next();
             number = set.getInt("count");
             System.out.println(number);
-            set = statement.executeQuery("select EVENTS.Name, Tickets.kind, purchases.date, event_types.price  from (logins JOIN users ON logins.id = users.id JOIN purchases ON purchases.User_ID = USERS.ID JOIN TICKETS on TICKETS.ID = PURCHASES.Ticket_ID join events on EVENTS.ID = TICKETS.Event_ID join event_types on events.type = event_types.type) where logins.Username = '" + user + "';" );
+            set = statement.executeQuery("select EVENTS.Name, Tickets.kind, purchases.date, price(tickets.id, users.id)  from (logins JOIN users ON logins.id = users.id JOIN purchases ON purchases.User_ID = USERS.ID JOIN TICKETS on TICKETS.ID = PURCHASES.Ticket_ID join events on EVENTS.ID = TICKETS.Event_ID join event_types on events.type = event_types.type) where logins.Username = '" + user + "';" );
             set.next();
             for(int i=0; i < number; i++){
                 lol.add(new TicketDetails(set.getString(1), set.getString(2), set.getString(3), set.getInt(4)));
