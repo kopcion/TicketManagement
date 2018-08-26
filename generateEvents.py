@@ -42,9 +42,9 @@ surnames = ["Smith", "Jones", "Taylor", "Williams", "Brown", "Davies", "Evans", 
             "Ross", "Owen", "Mason", "Knight", "Kennedy", "Butler", "Saunders"]
 
 
-eventsNumber = 50
-population = 500
-ticketNumber = 8000
+eventsNumber = 10
+population = 50
+ticketNumber = 800
 
 generatedNames = []
 generatedSurnames = []
@@ -54,8 +54,6 @@ generatedPasswords = []
 generatedEvents = []
 eventTypes = []
 generatedTickets = []
-
-print("INSERT INTO event_types VALUES ('small', 100), ('medium', 200), ('big', 300);")
 
 #generate events
 
@@ -74,8 +72,6 @@ print("(" + str(eventsNumber-1) + ", '" + generatedEvents[eventsNumber-1] + ");"
 
 for i in range(ticketNumber):
     generatedTickets.append(str(random.randint(0, eventsNumber-1)) + ", '" + random.choice(["children", "normal", "elderly", "special"]))
-
-print("INSERT INTO ticket_kinds VALUES ('children', 30), ('normal', 0), ('elderly', 40), ('special', 40);")
 
 print("INSERT INTO tickets VALUES")
 for i in range(ticketNumber-1):
@@ -121,22 +117,13 @@ for i in range(population):
         boughtTickets[(ind + no) % ticketNumber] = 1
         generatedHistory.append(str(i) + ", " + str((ind+no)%ticketNumber) + ", '2018-" + str(random.randint(1,8)) + "-" + str(random.randint(1, 27)) + "'")
 
+print("INSERT INTO clients_discounts VALUES")
+for i in range(population-1):
+	print("(0," + str(i) + "),")
+print("(0," + str(population-1) + ");")
+
+
 print("INSERT INTO purchases VALUES")
 for i in range(len(generatedHistory)-1):
     print("(" + generatedHistory[i] + "),")
 print("(" + generatedHistory[len(generatedHistory)-1] + ");")
-#for i in range(population):
-#    print(generatedNames[i] + " " + generatedSurnames[i] + " " + generatedLogins[i] + " " + generatedPasswords[i])
-
-
-
-#print(generatedEvents)
-
-
-
-#print(generatedTickets)
-
-
-
-
-
