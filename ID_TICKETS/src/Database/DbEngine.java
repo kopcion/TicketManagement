@@ -27,10 +27,13 @@ public class DbEngine {
         }
     }
 
-
     public static void login(String login, String password) throws LoginException {
-//        if(login.equals(null) || password.equals(null) || login.length() < 6 || password.length() < 6) throw new LoginException();
-//        if(!checkPassword(login,password)) throw new LoginException();
+        if(login.equals(null) || password.equals(null) || login.length() < 6 || password.length() < 6) throw new LoginException();
+        if(!checkLogin(login)) {
+            System.out.println("kappa");
+            throw new LoginException();
+        }
+        if(!checkPassword(login,password)) throw new LoginException();
     }
 
     public static void register(String login, String password, String name, String surname){
@@ -93,6 +96,20 @@ public class DbEngine {
         return 0;
     }
 
+    static boolean checkLogin(String login){
+        Statement statement = null;
+        ResultSet set = null;
+        try {
+            statement = connection.createStatement();
+            set = statement.executeQuery("SELECT count(*) FROM logins WHERE username = '" + login + "';");
+            set.next();
+            return(set.getInt(1) == 0);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     static boolean checkPassword(String login, String password){
         try {
             Statement stmt = connection.createStatement();
@@ -114,11 +131,11 @@ public class DbEngine {
         try {
             Statement statement = connection.createStatement();
             System.out.println(user);
-            set = statement.executeQuery("select count(*) from (logins JOIN users ON logins.id = users.id JOIN purchases ON purchases.User_ID = USERS.ID JOIN TICKETS on TICKETS.ID = PURCHASES.Ticket_ID join events on EVENTS.ID = TICKETS.Event_ID) where logins.Username = '" + user + "'" );
+            set = statement.executeQuery("select countTickets('" + user + "');");
             set.next();
-            number = set.getInt("count");
+            number = set.getInt(1);
             System.out.println(number);
-            set = statement.executeQuery("select EVENTS.Name, Tickets.kind, purchases.date, price(tickets.id, users.id)  from (logins JOIN users ON logins.id = users.id JOIN purchases ON purchases.User_ID = USERS.ID JOIN TICKETS on TICKETS.ID = PURCHASES.Ticket_ID join events on EVENTS.ID = TICKETS.Event_ID join event_types on events.type = event_types.type) where logins.Username = '" + user + "';" );
+            set = statement.executeQuery("SELECT * FROM getTickets('" + user + "');" );
             set.next();
             for(int i=0; i < number; i++){
                 lol.add(new TicketDetails(set.getString(1), set.getString(2), set.getString(3), set.getInt(4)));
@@ -148,7 +165,7 @@ public class DbEngine {
         ObservableList list = FXCollections.observableArrayList();
         try {
             Statement statement = connection.createStatement();
-            ResultSet set = statement.executeQuery("SELECT events.name, events.date FROM events where date > now() order by 2");
+            ResultSet set = statement.executeQuery("SELECT * FROM upcoming;");
             int number = countRows("events", "date > now()");
             for(int i=0; i < number; i++){
                 set.next();
