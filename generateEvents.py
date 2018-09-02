@@ -127,3 +127,11 @@ print("INSERT INTO purchases VALUES")
 for i in range(len(generatedHistory)-1):
     print("(" + generatedHistory[i] + "),")
 print("(" + generatedHistory[len(generatedHistory)-1] + ");")
+
+
+print("INSERT INTO LAST_LOGINS VALUES")
+for i in range(population-1):
+	for i in range(random.randint(1,10):
+		print("("+str(i)+",2018-09-0"+str(random.randint(1,2))+str(random.randint(10,24))+":"+str(random.randint(10,59))+":"+str(random.randint(10,59))+"."+str(random.randint(111111,999999) + "),")
+print("("+str(population)+",2018-09-0"+str(random.randint(1,2))+str(random.randint(10,24))+":"+str(random.randint(10,59))+":"+str(random.randint(10,59))+"."+str(random.randint(111111,999999) + ");")
+
