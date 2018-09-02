@@ -7,6 +7,8 @@
   DROP TABLE IF EXISTS CLIENTS_DISCOUNTS CASCADE ;
   DROP TABLE IF EXISTS DISCOUNTS CASCADE ;
   DROP TABLE IF EXISTS EVENT_Types CASCADE ;
+  DROP TABLE if exists LAST_LOGINS CASCADE;
+
 
   CREATE TABLE TICKET_KINDS(
     Kind VARCHAR PRIMARY KEY,
@@ -18,6 +20,11 @@
     Name VARCHAR NOT NULL,
     Surname VARCHAR NOT NULL
   );
+
+  CREATE TABLE LAST_LOGINS(
+  IDUser numeric not null references USERS(ID),
+  lastLog timestamp default now()
+);
 
   CREATE TABLE DISCOUNTS(
     ID NUMERIC PRIMARY KEY,
@@ -101,3 +108,59 @@ CREATE OR REPLACE FUNCTION price(IN ticketID NUMERIC, IN userID NUMERIC)
     where TICKETS.ID = ticketID and USERS.ID = userID;
   END;$BODY$
     LANGUAGE plpgsql;
+
+CREATE OR REPLACE FUNCTION countTickets(VARCHAR) RETURNS INTEGER AS $$
+Begin
+  RETURN (SELECT
+      count(*)
+    FROM logins
+      JOIN users ON logins.id = users.id
+      JOIN purchases ON purchases.User_ID = USERS.ID
+      JOIN TICKETS on TICKETS.ID = PURCHASES.Ticket_ID
+      JOIN events on EVENTS.ID = TICKETS.Event_ID
+    WHERE logins.Username = $1);
+END;$$
+LANGUAGE PLPGSQL;
+
+
+CREATE OR REPLACE FUNCTION getTickets(VARCHAR) RETURNS TABLE (
+  Name VARCHAR,
+  Ticket_kind VARCHAR,
+  Date DATE,
+  Price NUMERIC
+) AS $$
+BEGIN
+  RETURN QUERY select
+    EVENTS.Name,
+    Tickets.kind,
+    purchases.date,
+    price(tickets.id, users.id)
+  from (logins
+    JOIN users ON logins.id = users.id
+    JOIN purchases ON purchases.User_ID = USERS.ID
+    JOIN TICKETS on TICKETS.ID = PURCHASES.Ticket_ID
+    join events on EVENTS.ID = TICKETS.Event_ID
+    join event_types on events.type = event_types.type)
+  where logins.Username = $1;
+END;$$
+LANGUAGE PLPGSQL;
+
+CREATE OR REPLACE VIEW upcoming AS SELECT events.name, events.date FROM events where date > now() order by 2;
+
+create or replace FUNCTION manageLoginsFunc() RETURNS TRIGGER as
+$$BEGIN
+  if 10 < (SELECT count(*) FROM LAST_LOGINS where IDUser = new.IDUser) THEN
+    DELETE FROM LAST_LOGINS
+    WHERE lastLog = (
+      SELECT
+        min(lastLog)
+      FROM LAST_LOGINS
+      WHERE
+        IDUser = new.IDUser
+    );
+  END IF;
+  RETURN new;
+END;$$
+LANGUAGE PLPGSQL;
+
+CREATE TRIGGER manageLogins AFTER INSERT OR UPDATE on LAST_LOGINS for each ROW EXECUTE PROCEDURE manageLoginsFunc();
